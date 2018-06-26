@@ -12,16 +12,20 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../../matchzoo'))
+sys.path.insert(0, os.path.abspath('../../matchzoo/engine'))
+sys.path.insert(0, os.path.abspath('../../matchzoo/model'))
+sys.path.insert(0, os.path.abspath('../../matchzoo/task'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'MatchZoo'
-copyright = '2018, yixing fan'
-author = 'yixing fan'
+project = 'Matzoo 2.0'
+copyright = '2018, MatchZoo'
+author = 'MatchZoo'
 
 # The short X.Y version
 version = ''
@@ -40,7 +44,14 @@ release = '2.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -78,10 +89,6 @@ pygments_style = 'sphinx'
 #
 html_theme = 'sphinx_rtd_theme'
 
-# Register the theme as an extension to generate a sitemap.xml
-
-# Guzzle theme options (see theme.conf for more information)
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -107,7 +114,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'MatchZoodoc'
+htmlhelp_basename = 'Matzoo20doc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -134,8 +141,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'MatchZoo.tex', 'MatchZoo Documentation',
-     'yixing fan', 'manual'),
+    (master_doc, 'Matzoo20.tex', 'Matzoo 2.0 Documentation',
+     'wqh17101', 'manual'),
 ]
 
 
@@ -144,7 +151,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'matchzoo', 'MatchZoo Documentation',
+    (master_doc, 'matzoo20', 'Matzoo 2.0 Documentation',
      [author], 1)
 ]
 
@@ -155,10 +162,41 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'MatchZoo', 'MatchZoo Documentation',
-     author, 'MatchZoo', 'One line description of project.',
+    (master_doc, 'Matzoo20', 'Matzoo 2.0 Documentation',
+     author, 'Matzoo20', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
+# -- Options for Epub output -------------------------------------------------
+
+# Bibliographic Dublin Core info.
+epub_title = project
+epub_author = author
+epub_publisher = author
+epub_copyright = copyright
+
+# The unique identifier of the text. This can be a ISBN number
+# or the project homepage.
+#
+# epub_identifier = ''
+
+# A unique identification for the text.
+#
+# epub_uid = ''
+
+# A list of files that should not be packed into the epub file.
+epub_exclude_files = ['search.html']
+
+
 # -- Extension configuration -------------------------------------------------
+
+# -- Options for intersphinx extension ---------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/': None}
+
+# -- Options for todo extension ----------------------------------------------
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
