@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>matchzoo.engine.param &mdash; Matzoo 2.0 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Matzoo 2.0
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">matchzoo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Matzoo 2.0</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>matchzoo.engine.param</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for matchzoo.engine.param</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Parameter class.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+
+<span class="kn">import</span> <span class="nn">hyperopt.pyll</span>
+<span class="kn">from</span> <span class="nn">matchzoo</span> <span class="k">import</span> <span class="n">engine</span>
+
+<span class="c1"># Both hyperopt native spaces and matchzoo proxies are valid spaces.</span>
+<span class="n">SpaceType</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">hyperopt</span><span class="o">.</span><span class="n">pyll</span><span class="o">.</span><span class="n">Apply</span><span class="p">,</span>
+                         <span class="n">engine</span><span class="o">.</span><span class="n">hyper_spaces</span><span class="o">.</span><span class="n">HyperoptProxy</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Param"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.param.Param">[docs]</a><span class="k">class</span> <span class="nc">Param</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameter class.</span>
+
+<span class="sd">    Basic usages with a name and  value:</span>
+
+<span class="sd">        &gt;&gt;&gt; param = Param(&#39;my_param&#39;, 10)</span>
+<span class="sd">        &gt;&gt;&gt; param.name</span>
+<span class="sd">        &#39;my_param&#39;</span>
+<span class="sd">        &gt;&gt;&gt; param.value</span>
+<span class="sd">        10</span>
+
+<span class="sd">    Use with a validator to make sure the parameter always keeps a valid</span>
+<span class="sd">    value.</span>
+
+<span class="sd">        &gt;&gt;&gt; param = Param(</span>
+<span class="sd">        ...     name=&#39;my_param&#39;,</span>
+<span class="sd">        ...     value=5,</span>
+<span class="sd">        ...     validator=lambda x: 0 &lt; x &lt; 20</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; param.validator  # doctest: +ELLIPSIS</span>
+<span class="sd">        &lt;function &lt;lambda&gt; at 0x...&gt;</span>
+<span class="sd">        &gt;&gt;&gt; param.value</span>
+<span class="sd">        5</span>
+<span class="sd">        &gt;&gt;&gt; param.value = 10</span>
+<span class="sd">        &gt;&gt;&gt; param.value</span>
+<span class="sd">        10</span>
+<span class="sd">        &gt;&gt;&gt; param.value = -1</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">        ValueError: Validator not satifised.</span>
+<span class="sd">        The validator&#39;s definition is as follows:</span>
+<span class="sd">        validator=lambda x: 0 &lt; x &lt; 20</span>
+
+<span class="sd">    Use with a hyper space. Setting up a hyper space for a parameter makes the</span>
+<span class="sd">    parameter tunable in a :class:`matchzoo.engine.Tuner`.</span>
+
+<span class="sd">        &gt;&gt;&gt; from matchzoo.engine.hyper_spaces import quniform</span>
+<span class="sd">        &gt;&gt;&gt; param = Param(</span>
+<span class="sd">        ...     name=&#39;positive_num&#39;,</span>
+<span class="sd">        ...     value=1,</span>
+<span class="sd">        ...     hyper_space=quniform(low=1, high=5)</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; param.hyper_space  # doctest: +ELLIPSIS</span>
+<span class="sd">        &lt;hyperopt.pyll.base.Apply object at 0x...&gt;</span>
+<span class="sd">        &gt;&gt;&gt; from hyperopt.pyll.stochastic import sample</span>
+<span class="sd">        &gt;&gt;&gt; samples = [sample(param.hyper_space) for _ in range(64)]</span>
+<span class="sd">        &gt;&gt;&gt; set(samples) == {1, 2, 3, 4, 5}</span>
+<span class="sd">        True</span>
+
+<span class="sd">    The boolean value of a :class:`Param` instance is only `True`</span>
+<span class="sd">    when the value is not `None`. This is because some default falsy values</span>
+<span class="sd">    like zero or an empty list are valid parameter values. In other words,</span>
+<span class="sd">    the boolean value means to be &quot;if the parameter value is filled&quot;.</span>
+
+<span class="sd">        &gt;&gt;&gt; param = Param(&#39;dropout&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; if param:</span>
+<span class="sd">        ...     print(&#39;OK&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; param = Param(&#39;dropout&#39;, 0)</span>
+<span class="sd">        &gt;&gt;&gt; if param:</span>
+<span class="sd">        ...     print(&#39;OK&#39;)</span>
+<span class="sd">        OK</span>
+
+<span class="sd">    A `_pre_assignment_hook` is initialized as a data type convertor if the</span>
+<span class="sd">    value is set as a number to keep data type consistency of the parameter.</span>
+<span class="sd">    This conversion supports python built-in numbers, `numpy` numbers, and</span>
+<span class="sd">    any number that inherits :class:`numbers.Number`.</span>
+
+<span class="sd">        &gt;&gt;&gt; param = Param(&#39;float_param&#39;, 0.5)</span>
+<span class="sd">        &gt;&gt;&gt; param.value = 10</span>
+<span class="sd">        &gt;&gt;&gt; param.value</span>
+<span class="sd">        10.0</span>
+<span class="sd">        &gt;&gt;&gt; type(param.value)</span>
+<span class="sd">        &lt;class &#39;float&#39;&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">hyper_space</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">SpaceType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">validator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameter constructor.</span>
+
+<span class="sd">        :param name: Name of the parameter.</span>
+<span class="sd">        :param value: Value of the parameter, `None` by default, which means</span>
+<span class="sd">            &quot;this parameter is not filled yet.&quot;</span>
+<span class="sd">        :param hyper_space: Hyper space of the parameter, `None` by default.</span>
+<span class="sd">            If set, then a :class:`matchzoo.engine.ParamTable` that has this</span>
+<span class="sd">            parameter will include this `hyper_space` as a part of the</span>
+<span class="sd">            parameter table&#39;s search space.</span>
+<span class="sd">        :param validator: Validator of the parameter, `None` by default. If</span>
+<span class="sd">            validation is needed, pass a callable that, given a value, returns</span>
+<span class="sd">            a `bool`. The definition of the validator is retrieved when the</span>
+<span class="sd">            validation fails, so either use a function or a `lambda` that</span>
+<span class="sd">            occupies its own line for better readability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyper_space</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pre_assignment_hook</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyper_space</span> <span class="o">=</span> <span class="n">hyper_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return: Name of the parameter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return: Value of the parameter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the value of parameter to `new_value`.</span>
+
+<span class="sd">        Notice that this setter validates `new_value` before assignment. As</span>
+<span class="sd">        a result, if the validaiton fails, the value of the parameter is not</span>
+<span class="sd">        changed.</span>
+
+<span class="sd">        :param new_value: New value of the parameter to set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_assignment_hook</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_assignment_hook</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">new_value</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_assignment_hook</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_infer_pre_assignment_hook</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hyper_space</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">hyperopt</span><span class="o">.</span><span class="n">pyll</span><span class="o">.</span><span class="n">Apply</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return: Hyper space of the parameter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyper_space</span>
+
+    <span class="nd">@hyper_space</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">hyper_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_space</span><span class="p">:</span> <span class="n">SpaceType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:param new_space: New space of the parameter to set.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_space</span><span class="p">,</span> <span class="n">engine</span><span class="o">.</span><span class="n">hyper_spaces</span><span class="o">.</span><span class="n">HyperoptProxy</span><span class="p">):</span>
+            <span class="n">new_space</span> <span class="o">=</span> <span class="n">new_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyper_space</span> <span class="o">=</span> <span class="n">new_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;:return: Validator of the parameter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validator</span>
+
+    <span class="nd">@validator</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_validator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;:param new_validator: New space of the parameter to set.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_validator</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">new_validator</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Validator must be a callable or None.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validator</span> <span class="o">=</span> <span class="n">new_validator</span>
+
+    <span class="k">def</span> <span class="nf">_infer_pre_assignment_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pre_assignment_hook</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validator</span><span class="p">:</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Validator not satifised.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">error_msg</span> <span class="o">+=</span> <span class="s2">&quot;The validator&#39;s definition is as follows:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">error_msg</span> <span class="o">+=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_validator</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:return: `False` when the value is `None`, `True` otherwise.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, MatchZoo.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

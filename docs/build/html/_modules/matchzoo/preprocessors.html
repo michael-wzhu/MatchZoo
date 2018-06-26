@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>matchzoo.preprocessors &mdash; Matzoo 2.0 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Matzoo 2.0
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">matchzoo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Matzoo 2.0</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>matchzoo.preprocessors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for matchzoo.preprocessors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;Matchzoo toolkit for text pre-processing.&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">many_stop_words</span>
+
+
+<span class="n">match_punc</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;[^\w\s]&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessorUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.ProcessorUnit">[docs]</a><span class="k">class</span> <span class="nc">ProcessorUnit</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Process unit do not persive state (i.e. do not need fit).&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="ProcessorUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.ProcessorUnit.transform">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Abstract base method, need to be implemented in subclass.&quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="StatefulProcessorUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StatefulProcessorUnit">[docs]</a><span class="k">class</span> <span class="nc">StatefulProcessorUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit do persive state (i.e. need fit).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get current state.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span>
+
+<div class="viewcode-block" id="StatefulProcessorUnit.fit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StatefulProcessorUnit.fit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Abstract base method, need to be implemented in subclass.&quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="TokenizeUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.TokenizeUnit">[docs]</a><span class="k">class</span> <span class="nc">TokenizeUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit for text tokenization.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TokenizeUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.TokenizeUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process input data from raw terms to list of tokens.</span>
+
+<span class="sd">        :param input: raw textual input.</span>
+
+<span class="sd">        :return tokens: tokenized tokens as a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LowercaseUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.LowercaseUnit">[docs]</a><span class="k">class</span> <span class="nc">LowercaseUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit for text lower case.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LowercaseUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.LowercaseUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert list of tokens to lower case.</span>
+
+<span class="sd">        :param tokens: list of tokens.</span>
+
+<span class="sd">        :return tokens: lower-cased list of tokens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="PuncRemovalUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.PuncRemovalUnit">[docs]</a><span class="k">class</span> <span class="nc">PuncRemovalUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit for remove punctuations.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PuncRemovalUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.PuncRemovalUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove punctuations from list of tokens.</span>
+
+<span class="sd">        :param tokens: list of toekns.</span>
+
+<span class="sd">        :return rv: tokens  without punctuation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">token</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">match_punc</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">token</span><span class="p">)]</span></div></div>
+
+
+<div class="viewcode-block" id="DigitRemovalUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.DigitRemovalUnit">[docs]</a><span class="k">class</span> <span class="nc">DigitRemovalUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit to remove digits.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DigitRemovalUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.DigitRemovalUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove digits from list of tokens.</span>
+
+<span class="sd">        :param tokens: list of tokens to be filtered.</span>
+
+<span class="sd">        :return tokens: tokens of tokens without digits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">token</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span></div></div>
+
+
+<div class="viewcode-block" id="StopRemovalUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StopRemovalUnit">[docs]</a><span class="k">class</span> <span class="nc">StopRemovalUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit to remove stop words.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span> <span class="o">=</span> <span class="n">lang</span>
+
+<div class="viewcode-block" id="StopRemovalUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StopRemovalUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove stopwords from list of tokenized tokens.</span>
+
+<span class="sd">        :param tokens: list of tokenized tokens.</span>
+<span class="sd">        :param lang: language code for stopwords.</span>
+
+<span class="sd">        :return tokens: list of tokenized tokens without stopwords.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">token</span>
+                <span class="k">for</span> <span class="n">token</span>
+                <span class="ow">in</span> <span class="n">tokens</span>
+                <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stopwords</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="StopRemovalUnit.get_stopwords"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StopRemovalUnit.get_stopwords">[docs]</a>    <span class="k">def</span> <span class="nf">get_stopwords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get stopwords based on language.</span>
+
+<span class="sd">        :params lang: language code.</span>
+
+<span class="sd">        :return stop_list: list of stop words.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">many_stop_words</span><span class="o">.</span><span class="n">get_stop_words</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="StemmingUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StemmingUnit">[docs]</a><span class="k">class</span> <span class="nc">StemmingUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Process unit for token stemming.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stemmer</span><span class="o">=</span><span class="s1">&#39;porter&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">=</span> <span class="n">stemmer</span>
+
+<div class="viewcode-block" id="StemmingUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.StemmingUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reducing inflected words to their word stem, base or root form.</span>
+
+<span class="sd">        :param tokens: list of string to be stemmed.</span>
+<span class="sd">        :param stemmer: stemmer to use, `porter` or `lancaster`.</span>
+
+<span class="sd">        :raise ValueError: stemmer type should be porter or lancaster.</span>
+
+<span class="sd">        :return tokens: stemmed token.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">==</span> <span class="s1">&#39;porter&#39;</span><span class="p">:</span>
+            <span class="n">porter_stemmer</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">PorterStemmer</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">porter_stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">==</span> <span class="s1">&#39;lancaster&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span> <span class="o">==</span> <span class="s1">&#39;krovetz&#39;</span><span class="p">:</span>
+            <span class="n">lancaster_stemmer</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">lancaster</span><span class="o">.</span><span class="n">LancasterStemmer</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">lancaster_stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Not supported supported stemmer type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stemmer</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="LemmatizationUnit"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.LemmatizationUnit">[docs]</a><span class="k">class</span> <span class="nc">LemmatizationUnit</span><span class="p">(</span><span class="n">ProcessorUnit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process unit for token lemmatization.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LemmatizationUnit.transform"><a class="viewcode-back" href="../../matchzoo.html#matchzoo.preprocessors.LemmatizationUnit.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Lemmatization a sequence of tokens.</span>
+
+<span class="sd">        :param tokens: list of tokens to be lemmatized.</span>
+
+<span class="sd">        :return tokens: list of lemmatizd tokens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lemmatizer</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">WordNetLemmatizer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">lemmatizer</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">]</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, MatchZoo.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

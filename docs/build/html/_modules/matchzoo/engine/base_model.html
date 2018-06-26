@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>matchzoo.engine.base_model &mdash; Matzoo 2.0 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Matzoo 2.0
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">matchzoo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Matzoo 2.0</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>matchzoo.engine.base_model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for matchzoo.engine.base_model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Base Model.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">dill</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">keras</span>
+
+<span class="kn">from</span> <span class="nn">matchzoo</span> <span class="k">import</span> <span class="n">engine</span>
+
+
+<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class of all matchzoo models.&quot;&quot;&quot;</span>
+
+    <span class="n">BACKEND_FILENAME</span> <span class="o">=</span> <span class="s1">&#39;backend.h5&#39;</span>
+    <span class="n">PARAMS_FILENAME</span> <span class="o">=</span> <span class="s1">&#39;params.pkl&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">params</span><span class="p">:</span> <span class="n">engine</span><span class="o">.</span><span class="n">ParamTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">backend</span><span class="p">:</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`BaseModel` constructor.</span>
+
+<span class="sd">        :param params: model parameters, if not set, return value from</span>
+<span class="sd">            :meth:`get_default_params` will be used</span>
+<span class="sd">        :param backend: a keras model as the model backend</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_params</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">backend</span>
+
+<div class="viewcode-block" id="BaseModel.get_default_params"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.get_default_params">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_params</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">engine</span><span class="o">.</span><span class="n">ParamTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Model default parameters.</span>
+
+<span class="sd">        The common usage is to instantiate :class:`matchzoo.engine.ModelParams`</span>
+<span class="sd">            first, then set the model specific parametrs.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; class MyModel(BaseModel):</span>
+<span class="sd">            ...     def build(self):</span>
+<span class="sd">            ...         print(self._params[&#39;num_eggs&#39;], &#39;eggs&#39;)</span>
+<span class="sd">            ...         print(&#39;and&#39;, self._params[&#39;ham_type&#39;])</span>
+<span class="sd">            ...</span>
+<span class="sd">            ...     @classmethod</span>
+<span class="sd">            ...     def get_default_params(cls):</span>
+<span class="sd">            ...         params = engine.ParamTable()</span>
+<span class="sd">            ...         params.add(engine.Param(&#39;num_eggs&#39;, 512))</span>
+<span class="sd">            ...         params.add(engine.Param(&#39;ham_type&#39;, &#39;Parma Ham&#39;))</span>
+<span class="sd">            ...         return params</span>
+<span class="sd">            &gt;&gt;&gt; my_model = MyModel()</span>
+<span class="sd">            &gt;&gt;&gt; my_model.build()</span>
+<span class="sd">            512 eggs</span>
+<span class="sd">            and Parma Ham</span>
+
+<span class="sd">        Notice that all parameters must be serialisable for the entire model</span>
+<span class="sd">        to be serialisable. Therefore, it&#39;s strongly recommended to use python</span>
+<span class="sd">        native data types to store parameters.</span>
+
+<span class="sd">        :return: model parameters</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">ParamTable</span><span class="p">()</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;model_class&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;input_shapes&#39;</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;task&#39;</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;metrics&#39;</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s1">&#39;optimizer&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">engine</span><span class="o">.</span><span class="n">ParamTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return: model parameters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return model backend, a keras model instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span>
+
+<div class="viewcode-block" id="BaseModel.build"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.build">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build model, each sub class need to impelemnt this method.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">            &gt;&gt;&gt; BaseModel()  # doctest: +ELLIPSIS</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            TypeError: Can&#39;t instantiate abstract class BaseModel ...</span>
+<span class="sd">            &gt;&gt;&gt; class MyModel(BaseModel):</span>
+<span class="sd">            ...     def build(self):</span>
+<span class="sd">            ...         pass</span>
+<span class="sd">            &gt;&gt;&gt; MyModel</span>
+<span class="sd">            &lt;class &#39;matchzoo.engine.base_model.MyModel&#39;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="BaseModel.compile"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.compile">[docs]</a>    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compile model for training.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">],</span>
+                              <span class="n">loss</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">],</span>
+                              <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="BaseModel.fit"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">keras</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">History</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the model.</span>
+
+<span class="sd">        See :meth:`keras.models.Model.fit` for more details.</span>
+
+<span class="sd">        :param x: input data</span>
+<span class="sd">        :param y: labels</span>
+<span class="sd">        :param batch_size: number of samples per gradient update</span>
+<span class="sd">        :param epochs: number of epochs to train the model</span>
+<span class="sd">        :param verbose: 0, 1, or 2. Verbosity mode. 0 = silent, 1 = verbose,</span>
+<span class="sd">            2 = one log line per epoch.</span>
+
+<span class="sd">        :return: A `keras.callbacks.History` instance. Its history attribute</span>
+<span class="sd">        contains all information collected during training.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                                 <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+                                 <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel.evaluate"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the model.</span>
+
+<span class="sd">        See :meth:`keras.models.Model.evaluate` for more details.</span>
+
+<span class="sd">        :param x: input data</span>
+<span class="sd">        :param y: labels</span>
+<span class="sd">        :param batch_size: number of samples per gradient update</span>
+<span class="sd">        :param verbose: verbosity mode, 0 or 1</span>
+<span class="sd">        :return: scalar test loss (if the model has a single output and no</span>
+<span class="sd">            metrics) or list of scalars (if the model has multiple outputs</span>
+<span class="sd">            and/or metrics). The attribute `model.backend.metrics_names` will</span>
+<span class="sd">            give you the display labels for the scalar outputs.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel.predict"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate output predictions for the input samples.</span>
+
+<span class="sd">        See :meth:`keras.models.Model.predict` for more details.</span>
+
+<span class="sd">        :param x: input data</span>
+<span class="sd">        :param batch_size: number of samples per gradient update</span>
+<span class="sd">        :return: numpy array(s) of predictions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel.save"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the model.</span>
+
+<span class="sd">        A saved model is represented as a directory with two files. One is a</span>
+<span class="sd">        model parameters file saved by `pickle`, and the other one is a model</span>
+<span class="sd">        h5 file saved by `keras`.</span>
+
+<span class="sd">        :param dirpath: directory path of the saved model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dirpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileExistsError</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dirpath</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+        <span class="n">backend_file_path</span> <span class="o">=</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BACKEND_FILENAME</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">backend_file_path</span><span class="p">)</span>
+
+        <span class="n">params_file_path</span> <span class="o">=</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMS_FILENAME</span><span class="p">)</span>
+        <span class="n">dill</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">params_file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BaseModel.guess_and_fill_missing_params"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.BaseModel.guess_and_fill_missing_params">[docs]</a>    <span class="k">def</span> <span class="nf">guess_and_fill_missing_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Guess and fill missing parameters in :attribute:`params`.</span>
+
+<span class="sd">        Note: likely to be moved to a higher level API in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># index 0 points to an abstract task class</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">list_available_tasks</span><span class="p">()[</span><span class="mi">1</span><span class="p">]()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;input_shapes&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;input_shapes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">30</span><span class="p">,),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,)]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span>
+            <span class="n">available_metrics</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">list_available_metrics</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">available_metrics</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">available_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">list_available_losses</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">available_losses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;adam&#39;</span></div></div>
+
+
+<div class="viewcode-block" id="load_model"><a class="viewcode-back" href="../../../matchzoo.engine.html#matchzoo.engine.base_model.load_model">[docs]</a><span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="n">dirpath</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a model. The reverse function of :meth:`BaseModel.save`.</span>
+
+<span class="sd">    :param dirpath: directory path of the saved model</span>
+<span class="sd">    :return: a :class:`BaseModel` instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dirpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+
+    <span class="n">backend_file_path</span> <span class="o">=</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">BACKEND_FILENAME</span><span class="p">)</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">backend_file_path</span><span class="p">)</span>
+
+    <span class="n">params_file_path</span> <span class="o">=</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">PARAMS_FILENAME</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">dill</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">params_file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;model_class&#39;</span><span class="p">](</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, MatchZoo.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
