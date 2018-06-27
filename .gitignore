@@ -10,6 +10,7 @@
 .coverage
 predict.*
 build/
+docs/build/
 dist/
 log/*
 matchzoo/log/*
