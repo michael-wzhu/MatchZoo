@@ -12,6 +12,14 @@ matchzoo.models.dense\_baseline\_model module
     :undoc-members:
     :show-inheritance:
 
+matchzoo.models.dssm\_model module
+----------------------------------
+
+.. automodule:: matchzoo.models.dssm_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 matchzoo.models.naive\_model module
 -----------------------------------
 
