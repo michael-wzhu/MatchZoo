@@ -39,7 +39,7 @@ class ParamTable(object):
         if param.name in self._params:
             msg = "Parameter named {0} already exists.\n".format(param.name) + \
                   "To re-assign parameter {0} value, ".format(param.name) + \
-                  "use `params[\"{0}\"] = value` instead."
+                  "use `params[\"{0}\"] = value` instead.".format(param.name)
             raise ValueError(msg)
         self._params[param.name] = param
 
