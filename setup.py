@@ -30,7 +30,7 @@ setup(
     ],
     install_requires=[
       'keras >= 2.0.5',
-      'tensorflow >= 1.1.0',
+      'tensorflow == 1.5.0',
       'nltk >= 3.2.3',
       'numpy >= 1.12.1',
       'six >= 1.10.0',
