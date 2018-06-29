@@ -33,7 +33,7 @@ class ParamTable(object):
         self._params = {}
 
     def add(self, param: Param):
-        """:param param: parameter to add."""
+        """:param param: parameter to add.111"""
         if not isinstance(param, Param):
             raise TypeError("Only accepts a Param instance.")
         if param.name in self._params:
