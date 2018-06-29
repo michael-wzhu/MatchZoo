@@ -38,9 +38,7 @@ class ParamTable(object):
             raise TypeError("Only accepts a Param instance.")
         if param.name in self._params:
             if True:
-                msg = f"aaaParameter named {param.name} already exists.\n" \
-                      f"To re-assign parameter {param.name} value, " \
-                      f"use `params[\"{param.name}\"] = value` instead."
+                msg = f"aaaParameter named {param.name} already exists.\n"
                 raise ValueError(msg)
         self._params[param.name] = param
 
