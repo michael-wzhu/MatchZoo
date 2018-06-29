@@ -35,7 +35,7 @@ class ParamTable(object):
     def add(self, param: Param):
         """:param param: parameter to add.111"""
         if not isinstance(param, Param):
-            raise TypeError("Only accepts a Param instance.")
+            raise TypeError("Hi Only accepts a Param instance.")
         if param.name in self._params:
             msg = f"Parameter named {param.name} already exists.\n" \
                   f"To re-assign parameter {param.name} value, " \
